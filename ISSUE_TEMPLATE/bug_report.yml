@@ -1,0 +1,78 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before filing:** Check [known issues](../../blob/main/docs/SUPPORT.md#known-issues) first.
+        Do **not** include PHI, patient data, or credentials in this report.
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environment did this occur in?
+      options:
+        - POC
+        - TST
+        - SUP
+        - PROD
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Clear description of the bug. No PHI.
+      placeholder: Describe the unexpected behavior...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to...
+        2. Click...
+        3. See error...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P1 — Critical (PROD down or data integrity at risk)
+        - P2 — High (major feature broken, no workaround)
+        - P3 — Medium (degraded, workaround exists)
+        - P4 — Low (minor or cosmetic)
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, logs (scrubbed of any sensitive data), or anything else relevant.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: phi_check
+    attributes:
+      label: Compliance confirmation
+      options:
+        - label: I confirm this report contains no PHI, patient data, or credentials.
+          required: true

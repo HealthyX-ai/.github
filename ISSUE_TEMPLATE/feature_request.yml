@@ -1,0 +1,68 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Please provide as much context as possible.
+        Do **not** include PHI, patient data, or credentials in this request.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the pain point or gap this would address.
+      placeholder: As a [user type], I need to [goal] because [reason]...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would you like to see built or changed?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you're using today, or other approaches you've thought about.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority (from your perspective)
+      options:
+        - Nice to have
+        - Important
+        - Urgent — blocking work
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which environments would this affect?
+      multiple: true
+      options:
+        - POC
+        - TST
+        - SUP
+        - PROD
+        - All environments
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: phi_check
+    attributes:
+      label: Compliance confirmation
+      options:
+        - label: I confirm this request contains no PHI, patient data, or credentials.
+          required: true
