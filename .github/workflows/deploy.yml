@@ -1,0 +1,316 @@
+name: Deploy Pipeline
+
+# ── Triggers ─────────────────────────────────────────────
+# Runs on every push to main.
+# Can also be triggered manually to target a specific environment.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Deploy to specific environment only'
+        required: false
+        default: 'all'
+        type: choice
+        options: [all, POC, TST, SUP, PROD, DEMO_SUP, DEMO_PROD]
+
+# ── Kill Switch Logic ─────────────────────────────────────
+# Two kill switches checked before every job:
+#   ORG_ACTIONS_ENABLED  — org-level variable (halts everything org-wide)
+#   ACTIONS_ENABLED      — repo-level variable (halts this repo only)
+# Set either to 'false' to stop all deployments immediately.
+# Jobs skip gracefully (not fail) when disabled — keeps Actions history clean.
+
+# ── POC ───────────────────────────────────────────────────
+jobs:
+  deploy-poc:
+    name: "Deploy → POC"
+    runs-on: ubuntu-latest
+    environment: POC
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      (github.event_name == 'push' || github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'POC')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # ── Build ──────────────────────────────────────────
+      # Replace this block with your actual build steps.
+      # e.g. for Node/Cloudflare Workers:
+      #   run: npm ci && npm run build
+      # e.g. for ASP.NET Core:
+      #   run: dotnet restore && dotnet build --configuration Release
+      - name: Build
+        run: |
+          echo "TODO: Add build steps for this product"
+          echo "Stack: [your stack here]"
+
+      # ── Test ───────────────────────────────────────────
+      - name: Unit tests
+        run: |
+          echo "TODO: Add unit test command"
+          echo "e.g. npm test / dotnet test"
+
+      # ── Deploy to POC ──────────────────────────────────
+      # Replace with your actual deploy command.
+      # Secrets and variables are injected from GitHub environment settings.
+      - name: Deploy to POC
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "TODO: Add deploy command for POC"
+          echo "e.g. npx wrangler deploy --env poc"
+          echo "     dotnet publish + Azure deploy"
+
+      # ── Smoke Test ─────────────────────────────────────
+      - name: Smoke test POC
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add POC smoke test"
+          echo "e.g. curl --fail \$DEPLOY_URL/health"
+
+  # ── TST ─────────────────────────────────────────────────
+  deploy-tst:
+    name: "Deploy → TST"
+    runs-on: ubuntu-latest
+    environment: TST
+    needs: deploy-poc
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      needs.deploy-poc.result == 'success' &&
+      (github.event_name == 'push' || github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'TST')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          echo "TODO: Add build steps"
+
+      - name: Deploy to TST
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "TODO: Add deploy command for TST"
+
+      # Integration tests run in TST — not POC.
+      # These should be more comprehensive than unit tests.
+      - name: Integration tests
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add integration test suite"
+          echo "e.g. npm run test:integration"
+
+      - name: Smoke test TST
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add TST smoke test"
+
+  # ── SUP ─────────────────────────────────────────────────
+  # SUP requires 1 reviewer approval in GitHub Environment settings.
+  # The pipeline pauses here and sends a notification to the configured reviewer.
+  # The reviewer approves or rejects in the GitHub Actions UI.
+  deploy-sup:
+    name: "Deploy → SUP"
+    runs-on: ubuntu-latest
+    environment: SUP
+    needs: deploy-tst
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      needs.deploy-tst.result == 'success' &&
+      (github.event_name == 'push' || github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'SUP')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          echo "TODO: Add build steps"
+
+      - name: Deploy to SUP
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "TODO: Add deploy command for SUP"
+
+      - name: Smoke test SUP
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add SUP smoke test"
+
+      - name: Notify SUP deployment
+        run: |
+          echo "TODO: Add Slack or email notification"
+          echo "SUP is one day behind PROD — validate here before approving PROD"
+
+  # ── PROD ────────────────────────────────────────────────
+  # PROD requires 1 reviewer approval AND prevents self-review.
+  # The person who triggered the workflow cannot approve their own deployment.
+  # Both settings are configured in GitHub Environment settings, not here.
+  deploy-prod:
+    name: "Deploy → PROD"
+    runs-on: ubuntu-latest
+    environment: PROD
+    needs: deploy-sup
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      needs.deploy-sup.result == 'success' &&
+      (github.event_name == 'push' || github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'PROD')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          echo "TODO: Add build steps"
+
+      - name: Deploy to PROD
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "TODO: Add deploy command for PROD"
+
+      - name: Post-deploy health check
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add PROD health check"
+          echo "e.g. curl --fail \$DEPLOY_URL/health"
+          echo "     Run critical path smoke tests"
+
+      - name: Notify PROD deployment
+        run: |
+          echo "TODO: Add PROD deployment notification"
+          echo "Notify the team and any relevant stakeholders"
+
+  # ── DEMO SUP ────────────────────────────────────────────
+  # Demo environment for internal HealthyX demonstrations.
+  # Only runs when DEMO_ENABLED variable is 'true'.
+  deploy-demo-sup:
+    name: "Deploy → DEMO_SUP"
+    runs-on: ubuntu-latest
+    environment: DEMO_SUP
+    needs: deploy-tst
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      vars.DEMO_ENABLED == 'true' &&
+      needs.deploy-tst.result == 'success' &&
+      (github.event_name == 'push' || github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'DEMO_SUP')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          echo "TODO: Add build steps"
+
+      - name: Deploy to DEMO_SUP
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "TODO: Add deploy command for DEMO_SUP"
+
+      - name: Smoke test DEMO_SUP
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add DEMO_SUP smoke test"
+
+  # ── DEMO PROD ───────────────────────────────────────────
+  deploy-demo-prod:
+    name: "Deploy → DEMO_PROD"
+    runs-on: ubuntu-latest
+    environment: DEMO_PROD
+    needs: deploy-demo-sup
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      vars.DEMO_ENABLED == 'true' &&
+      needs.deploy-demo-sup.result == 'success' &&
+      (github.event_name == 'push' || github.event.inputs.target_env == 'all' || github.event.inputs.target_env == 'DEMO_PROD')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          echo "TODO: Add build steps"
+
+      - name: Deploy to DEMO_PROD
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "TODO: Add deploy command for DEMO_PROD"
+
+      - name: Post-deploy health check
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "TODO: Add DEMO_PROD health check"
+
+  # ── CLIENT ORG TEMPLATE ─────────────────────────────────
+  # Template for client org environments (e.g. NOMS_SUP, NOMS_PROD).
+  # When adding a new client org, duplicate these two jobs and replace
+  # CLIENT_ORG with the org name (e.g. NOMS).
+  # Control with a repo variable: [ORG]_ENABLED = 'true'
+  #
+  # deploy-client-org-sup:
+  #   name: "Deploy → CLIENT_ORG_SUP"
+  #   runs-on: ubuntu-latest
+  #   environment: CLIENT_ORG_SUP
+  #   needs: deploy-tst
+  #   if: |
+  #     vars.ORG_ACTIONS_ENABLED == 'true' &&
+  #     vars.ACTIONS_ENABLED == 'true' &&
+  #     vars.CLIENT_ORG_ENABLED == 'true' &&
+  #     needs.deploy-tst.result == 'success'
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - name: Deploy to CLIENT_ORG_SUP
+  #       env:
+  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #         CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  #         CF_KV_ID: ${{ vars.CF_KV_NAMESPACE_ID }}
+  #         DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+  #         ENV_NAME: ${{ vars.ENV_NAME }}
+  #       run: echo "TODO: deploy to CLIENT_ORG_SUP"
