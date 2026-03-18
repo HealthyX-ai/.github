@@ -1,36 +1,24 @@
 ---
-name: Feature request
-about: Suggest a new feature or enhancement for a HealthyX product
-title: "[FEATURE]"
-labels: enhancement
-assignees: NOMSVentures
-type: Feature
-
+name: Feature Request
+about: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: enhancement, needs-triage
 ---
 
-> Describe the problem first. The solution is secondary.
-> **Do not include PHI, patient data, or credentials anywhere in this request.**
+<!-- Open an issue before writing code. Describe the problem first — the solution second. -->
+<!-- Do not include PHI, patient data, or credentials in this request. -->
 
----
+## What problem does this solve?
 
-## What Problem Does This Solve?
+<!-- As a [user type], I need to [goal] because [reason]... -->
 
-<!-- What is the pain point, gap, or inefficiency this would address? -->
-<!-- Format: As a [user type], I need to [goal] because [reason]. -->
+## Proposed solution
 
----
+<!-- Describe the solution you'd like. -->
 
-## Proposed Solution
+## Alternatives considered
 
-<!-- What would you like to see built or changed? -->
-
----
-
-## Alternatives Considered
-
-<!-- Any workarounds you are using today, or other approaches you thought about. -->
-
----
+<!-- What other approaches did you consider? -->
 
 ## Priority
 
@@ -38,18 +26,14 @@ type: Feature
 - [ ] Important
 - [ ] Urgent — blocking work
 
----
-
-## Affected Environments
+## Affected environments
 
 - [ ] POC
 - [ ] TST
 - [ ] SUP
 - [ ] PROD
-- [ ] All environments
+- [ ] All
 
----
-
-## Compliance Confirmation
+## Compliance confirmation
 
 - [ ] This request contains no PHI, patient data, or credentials.
