@@ -1,64 +1,45 @@
 ---
-name: Bug report
-about: Report a bug or unexpected behavior in any HealthyX product
-title: "[BUG]"
-labels: bug
-assignees: NOMSVentures
-type: Bug
-
+name: Bug Report
+about: Report a bug or unexpected behavior
+title: "[BUG] "
+labels: bug, needs-triage
 ---
 
-> **Before filing:** Check the repo's `docs/SUPPORT.md` for known issues first.
-> **Do not include PHI, patient data, or credentials anywhere in this report.**
-
----
+<!-- Check known issues before filing: docs/SUPPORT.md#known-issues -->
+<!-- Do not include PHI, patient data, or credentials in this report. -->
 
 ## Environment
-
-Which environment did this occur in?
 
 - [ ] POC
 - [ ] TST
 - [ ] SUP
 - [ ] PROD
 
----
-
 ## Severity
 
 - [ ] P1 — Critical (PROD down or data integrity at risk)
 - [ ] P2 — High (major feature broken, no workaround)
-- [ ] P3 — Medium (feature degraded, workaround exists)
+- [ ] P3 — Medium (degraded, workaround exists)
 - [ ] P4 — Low (minor or cosmetic)
 
----
+## What happened?
 
-## What Happened
+<!-- Describe the unexpected behavior. No PHI. -->
 
-<!-- Describe the unexpected behavior clearly. No PHI. -->
+## What did you expect?
 
----
+<!-- Describe the expected behavior. -->
 
-## What You Expected
+## Steps to reproduce
 
-<!-- What should have happened? -->
+1. Go to...
+2. Click...
+3. See error...
 
----
+## Additional context
 
-## Steps to Reproduce
+<!-- Screenshots or logs — scrubbed of sensitive data. -->
 
-1.
-2.
-3.
-
----
-
-## Additional Context
-
-<!-- Screenshots or log output — scrubbed of any sensitive data. -->
-
----
-
-## Compliance Confirmation
+## Compliance confirmation
 
 - [ ] This report contains no PHI, patient data, or credentials.
