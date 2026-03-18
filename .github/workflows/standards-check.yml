@@ -1,0 +1,101 @@
+name: Standards Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, ready_for_review]
+
+jobs:
+  check-standards:
+    name: "Check PR Standards"
+    runs-on: ubuntu-latest
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true' &&
+      github.event.pull_request.draft == false
+
+    steps:
+      - name: Check branch naming convention
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch: $BRANCH"
+          if [[ ! "$BRANCH" =~ ^(feature|fix|hotfix|docs|infra|refactor|chore)/[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "❌ Branch name '$BRANCH' does not follow naming convention."
+            echo ""
+            echo "Expected format: type/description"
+            echo "Allowed types: feature, fix, hotfix, docs, infra, refactor, chore"
+            echo "Examples:"
+            echo "  feature/hcc-v28-logic"
+            echo "  fix/raf-rounding-error"
+            echo "  docs/update-implementation-guide"
+            exit 1
+          fi
+          echo "✓ Branch name valid"
+
+      - name: Check PR title convention
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "Title: $TITLE"
+          if [[ ! "$TITLE" =~ ^(feat|fix|docs|infra|refactor|test|chore|hotfix):\ .{5,} ]]; then
+            echo "❌ PR title does not follow convention."
+            echo ""
+            echo "Expected format: type: description (min 5 chars after colon)"
+            echo "Allowed types: feat, fix, docs, infra, refactor, test, chore, hotfix"
+            echo "Example: feat: add HCC V28 hierarchy suppression"
+            exit 1
+          fi
+          echo "✓ PR title valid"
+
+      - name: Check PR body is filled out
+        run: |
+          cat << 'PREOF' > /tmp/pr_body.txt
+          ${{ github.event.pull_request.body }}
+          PREOF
+          BODY_LENGTH=$(wc -c < /tmp/pr_body.txt)
+          echo "PR body length: $BODY_LENGTH chars"
+          if [ "$BODY_LENGTH" -lt 80 ]; then
+            echo "❌ PR body is too short — please fill out the PR template completely."
+            exit 1
+          fi
+          echo "✓ PR body present"
+
+      - name: Check issue is linked
+        run: |
+          cat << 'PREOF' > /tmp/pr_body.txt
+          ${{ github.event.pull_request.body }}
+          PREOF
+          if ! grep -iE 'closes[[:space:]]+#[0-9]+|fixes[[:space:]]+#[0-9]+|resolves[[:space:]]+#[0-9]+' /tmp/pr_body.txt; then
+            echo "❌ PR must reference a GitHub issue."
+            echo ""
+            echo "Add one of these to your PR body:"
+            echo "  Closes #123"
+            echo "  Fixes #123"
+            echo "  Resolves #123"
+            exit 1
+          fi
+          echo "✓ Issue linked"
+
+      - name: Check compliance checkbox
+        run: |
+          cat << 'PREOF' > /tmp/pr_body.txt
+          ${{ github.event.pull_request.body }}
+          PREOF
+          if ! grep -E '^\s*-\s*\[x\]' /tmp/pr_body.txt; then
+            echo "❌ No checkboxes checked in PR body."
+            echo ""
+            echo "Fill out the PR template and check the compliance confirmation."
+            exit 1
+          fi
+          echo "✓ Checkboxes present"
+
+  standards-disabled:
+    name: "Standards check skipped (kill switch active)"
+    runs-on: ubuntu-latest
+    if: |
+      vars.ORG_ACTIONS_ENABLED != 'true' ||
+      vars.ACTIONS_ENABLED != 'true'
+    steps:
+      - run: |
+          echo "Standards check skipped — kill switch active."
+          echo "ORG_ACTIONS_ENABLED = ${{ vars.ORG_ACTIONS_ENABLED }}"
+          echo "ACTIONS_ENABLED = ${{ vars.ACTIONS_ENABLED }}"
