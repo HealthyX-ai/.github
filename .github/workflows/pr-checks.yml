@@ -1,0 +1,75 @@
+name: PR Checks
+
+# ── Triggers ─────────────────────────────────────────────
+# Runs on every pull request targeting main.
+# The 'validate' job name is referenced in branch protection rules
+# as a required status check — do not rename it.
+on:
+  pull_request:
+    branches: [main]
+
+# ── PR Validation ─────────────────────────────────────────
+# All checks must pass before a PR can be merged to main.
+# This enforces code quality before anything reaches the deploy pipeline.
+jobs:
+  validate:
+    name: "Validate PR"
+    runs-on: ubuntu-latest
+    if: |
+      vars.ORG_ACTIONS_ENABLED == 'true' &&
+      vars.ACTIONS_ENABLED == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # ── Build check ────────────────────────────────────
+      # Confirms the code compiles / bundles without errors.
+      # Replace with your actual build command.
+      - name: Build check
+        run: |
+          echo "TODO: Add build verification"
+          echo "e.g. npm ci && npm run build"
+          echo "     dotnet restore && dotnet build"
+
+      # ── Unit tests ─────────────────────────────────────
+      # All unit tests must pass. No exceptions.
+      - name: Unit tests
+        run: |
+          echo "TODO: Add unit test command"
+          echo "e.g. npm test"
+          echo "     dotnet test"
+
+      # ── Lint ───────────────────────────────────────────
+      # Code style and formatting checks.
+      - name: Lint
+        run: |
+          echo "TODO: Add lint command"
+          echo "e.g. npm run lint"
+          echo "     dotnet format --verify-no-changes"
+
+      # ── Type check ─────────────────────────────────────
+      # For TypeScript repos — confirms no type errors.
+      # Remove this step if not using TypeScript.
+      - name: Type check
+        run: |
+          echo "TODO: Add type check (TypeScript only)"
+          echo "e.g. npm run typecheck"
+          echo "Remove this step if not using TypeScript"
+
+  # ── Skip notification ───────────────────────────────────
+  # When kill switches are active, this job runs instead
+  # so the PR doesn't appear broken — it's just paused.
+  checks-disabled:
+    name: "PR checks disabled by kill switch"
+    runs-on: ubuntu-latest
+    if: |
+      vars.ORG_ACTIONS_ENABLED != 'true' ||
+      vars.ACTIONS_ENABLED != 'true'
+    steps:
+      - name: Kill switch active
+        run: |
+          echo "PR checks skipped."
+          echo "ORG_ACTIONS_ENABLED = ${{ vars.ORG_ACTIONS_ENABLED }}"
+          echo "ACTIONS_ENABLED = ${{ vars.ACTIONS_ENABLED }}"
+          echo "Set both to 'true' to re-enable."
