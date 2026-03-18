@@ -1,0 +1,36 @@
+# CODEOWNERS
+# Automatically assigns reviewers when specific files are changed in a PR.
+# More specific rules override broader ones.
+# Replace team names with actual GitHub team names once created.
+# Replace @username with actual GitHub handles.
+
+# ── Default — everything ─────────────────────────────────
+*                              @HealthyX-ai/owners
+
+# ── GitHub Actions & CI/CD ───────────────────────────────
+.github/workflows/             @HealthyX-ai/owners
+.github/CODEOWNERS             @HealthyX-ai/owners
+
+# ── Infrastructure & config ──────────────────────────────
+*.yml                          @HealthyX-ai/owners
+*.yaml                         @HealthyX-ai/owners
+*.toml                         @HealthyX-ai/owners
+*.json                         @HealthyX-ai/owners
+
+# ── Data layer ───────────────────────────────────────────
+**/migrations/                 @HealthyX-ai/owners
+**/data/                       @HealthyX-ai/owners
+**/models/                     @HealthyX-ai/owners
+**/schema/                     @HealthyX-ai/owners
+
+# ── Security-sensitive ───────────────────────────────────
+CLAUDE.md                      @HealthyX-ai/owners
+LICENSE.md                     @HealthyX-ai/owners
+SECURITY.md                    @HealthyX-ai/owners
+CODE_OF_CONDUCT.md             @HealthyX-ai/owners
+.github/dependabot.yml         @HealthyX-ai/owners
+
+# ── Documentation ────────────────────────────────────────
+docs/                          @HealthyX-ai/team
+README.md                      @HealthyX-ai/team
+CONTRIBUTORS.md                @HealthyX-ai/team
