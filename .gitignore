@@ -1,0 +1,90 @@
+# ── Dependencies ─────────────────────────────────────────
+node_modules/
+.npm
+
+# ── Build output ─────────────────────────────────────────
+dist/
+build/
+out/
+.output/
+
+# ── Cloudflare / Wrangler ─────────────────────────────────
+.wrangler/
+wrangler.local.toml
+
+# ── Environment files ─────────────────────────────────────
+# Never commit secrets or local config
+.env
+.env.local
+.env.*.local
+.dev.vars
+
+# ── .NET / ASP.NET Core ──────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.pubxml
+
+# ── OS files ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+
+# ── Test coverage ────────────────────────────────────────
+coverage/
+.nyc_output/
+TestResults/
+
+# ── Temporary ────────────────────────────────────────────
+tmp/
+temp/
+*.tmp
+
+# ── Security — never commit these ────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+.env*
+!.env.example
+.dev.vars
+
+# ── Wrangler ─────────────────────────────────────────────
+.wrangler/
+wrangler.local.toml
+
+# ── Cloudflare ───────────────────────────────────────────
+.mf/
+
+# ── macOS ────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── Windows ──────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── JetBrains IDEs ───────────────────────────────────────
+.idea/
+*.iml
+
+# ── Test coverage ────────────────────────────────────────
+coverage/
+.nyc_output/
+lcov.info
